@@ -33,7 +33,10 @@
                     <textarea name="experiencia" class="form-control" rows="3" placeholder="Describe tu experiencia" required></textarea>
                 </div>
 
-                
+                <div class="mb-3">
+                    <label class="form-label">Adjuntar documento</label>
+                    <input class="form-control" type="file" id="archivo" required>
+                </div>
 
                 <button class="btn btn-primary w-100 fw-bold">
                     Guardar candidato
@@ -48,6 +51,87 @@
     </div>
 
 </div>
+
+    <script>
+        const formulario=document.getElementById("formulario"),
+        mensaje=document.getElementById("mensaje"),
+        lista=document.getElementById("lista");
+
+
+    
+        formulario.onsubmit=e=>{
+        e.preventDefault();
+
+            let archivo=document.getElementById("archivo").files[0];
+            if(!archivo) return mensaje.innerHTML="<div class='alert alert-danger'>Seleccione archivo</div>";
+
+            let reader=new FileReader();
+            reader.onload=()=>{
+                let data=JSON.parse(localStorage.getItem("candidatos")||"[]");
+
+                data.push({
+                    nombre:formulario.nombre.value,
+                    cargo:formulario.cargo.value,
+                    experiencia:formulario.experiencia.value,
+                    archivo:reader.result
+                });
+
+                localStorage.setItem("candidatos",JSON.stringify(data));
+                mensaje.innerHTML="<div class='alert alert-success'>Documento Guardado</div>";
+                formulario.reset();
+                render();
+            };
+            reader.readAsDataURL(archivo);
+        };
+
+
+        function verArchivo(base64){
+            let tipo = base64.split(";")[0];
+
+            if(tipo.includes("image")){//Aqui se visualiza la imagen
+                mensaje.innerHTML = "<img src='"+base64+"' class='img-fluid mt-2'>";
+            } else {//Aqui se visualiza el pdf en una nueva pestaña
+                    let byteCharacters = atob(base64.split(',')[1]);
+                    let byteNumbers = new Array(byteCharacters.length);
+
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+
+                    let byteArray = new Uint8Array(byteNumbers);
+                    let blob = new Blob([byteArray], {type: "application/pdf"});
+                    let url = URL.createObjectURL(blob);
+
+                    window.open(url, "_blank");
+            
+            }
+        }
+        
+
+        function render(){
+            lista.innerHTML="";
+            let data=JSON.parse(localStorage.getItem("candidatos")||"[]");
+
+            data.forEach((i,idx)=>{
+                lista.innerHTML+=`
+                <li class="list-group-item">
+                    <b>${i.nombre}</b> - ${i.cargo}
+                    <br>${i.experiencia}<br>
+
+                <button class="btn btn-success btn-sm mt-1" onclick="verArchivo('${i.archivo}')">Ver</button>
+
+                    <button class="btn btn-danger btn-sm mt-1" onclick="
+                    let d=JSON.parse(localStorage.getItem('candidatos'));
+                    d.splice(${idx},1);
+                    localStorage.setItem('candidatos',JSON.stringify(d));
+                    render();
+                    ">Eliminar</button>
+                </li>`;
+            });
+        }
+
+    render();
+    </script>
 
     
     
