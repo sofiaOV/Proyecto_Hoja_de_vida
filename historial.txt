@@ -1,0 +1,3 @@
+* 4960eb1 feat: Se agrega la funcion java script para guardar y mostrar candidato
+* 0b4c55d feat: Se agrega solo html, sin funciones de grabar
+* b04fb07 feat: Se agrega la presentacion personal del proyecto.
